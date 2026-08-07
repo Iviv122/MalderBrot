@@ -18,13 +18,17 @@ const mandelbrot = (cx, cy,max,it) => {
   return [n, d  <= max * max];
 }
 
-onmessage = (e) => {
-  const [m,is] = mandelbrot(e.data.cx,e.data.cy,e.data.max,e.data.it)
-  const res = {
-    x: e.data.i,
-    y: e.data.j,
-    m: m,
-    is: is
+onmessage = ( {data} ) => {
+  const arr = new Array(data.width)
+  for (let x = 0; x < data.width; x++){
+    arr[x] =
+      mandelbrot(
+        data.realStart +
+        (x / data.width) * (data.realEnd - data.realStart),
+        data.im,
+        data.l,
+        data.it
+      )
   }
-  postMessage(res)
+  postMessage({ j: data.j, res: arr})
 }
