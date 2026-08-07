@@ -10,12 +10,11 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 1000;
-const max = 2;
-
+const iteration = 200;
+const limit = 2;
 
 const getColor = (n) => {
-  return `rgb(0, ${(n * 5) % 256}, 0)`;
+  return `rgb(0, ${(n / iteration) * 256}, 0)`;
 };
 
 const setPixel = (x, y, color) => {
@@ -23,48 +22,45 @@ const setPixel = (x, y, color) => {
   ctx.fillRect(x, y, 1, 1);
 };
 
-
-function mandelbrot(cx, cy) {
-  let z = { x: 0, y: 0 },
-    n = 0,
-    p,
-    d;
-  do {
-    p = {
-      x: Math.pow(z.x, 2) - Math.pow(z.y, 2),
-      y: 2 * z.x * z.y,
-    };
-    z = {
-      x: p.x + cx,
-      y: p.y + cy,
-    };
-    d = z.x * z.x + z.y * z.y;
-    n += 1;
-  } while (d * d <= max * max && n < iteration);
-  return [n, d * d <= max * max];
-}
-
 const colors = new Array(iteration).fill(0).map((_, i) => getColor(i));
 colors[0] = "#000";
-
-const screen = Array.from({ length: height }, () => new Array(width).fill(0));
 
 const REAL_SET = { start: -2, end: 1 };
 const IMAGINARY_SET = { start: -1, end: 1 };
 
-function draw() {
+const sendToWorker = (i, j, cx, cy, max, it) => {
+  worker.postMessage({ i, j, cx, cy, max, it });
+};
+
+function ComputePixel(j, i) {
+  sendToWorker(
+    i,
+    j,
+    REAL_SET.start + (i / width) * (REAL_SET.end - REAL_SET.start),
+    IMAGINARY_SET.start +
+      (j / height) * (IMAGINARY_SET.end - IMAGINARY_SET.start),
+    limit,
+    iteration,
+  );
+}
+
+function compute_row(j) {
   for (let i = 0; i < width; i++) {
-    for (let j = 0; j < height; j++) {
-      const y = IMAGINARY_SET.start + (j / height) * (IMAGINARY_SET.end - IMAGINARY_SET.start);
-      const x = REAL_SET.start + (i / width) * (REAL_SET.end - REAL_SET.start);
-      const [m, isOk] = mandelbrot(x, y);
-      screen[j][i] = colors[isOk ? 0 : (m % colors.length) - 1 + 1];
-    }
-  }
-  for (let i = 0; i < width; i++) {
-    for (let j = 0; j < height; j++) {
-      setPixel(i, j, screen[j][i]);
-    }
+    ComputePixel(j, i);
   }
 }
+
+function draw() {
+  for (let i = 0; i < height; i++) {
+    compute_row(i);
+  }
+}
+const worker = new Worker("worker.js");
+worker.addEventListener("message", (msg) => {
+  setPixel(
+    msg.data.x,
+    msg.data.y,
+    colors[msg.data.isOk ? 0 : (msg.data.m % colors.length) - 1 + 1],
+  );
+});
 draw();
