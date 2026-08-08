@@ -8,10 +8,18 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 200;
+const iteration = 1000;
 const limit = 2;
 
-const colors = new Array(256).fill(0).map((_,val) =>`rgb(0, ${val % 256}, ${val % 256})`)
+var Module = {
+  onRuntimeInitialized: function () {
+    draw()
+  },
+};
+
+const colors = new Array(256)
+  .fill(0)
+  .map((_, val) => `rgb(0, ${val % 256}, ${val % 256})`);
 
 const clear = () => {
   ctx.fillStyle = "black";
@@ -37,11 +45,11 @@ worker.addEventListener("message", ({ data }) => {
     if (res[x] === last) {
       w++;
     } else {
-      if (res[x-1] > 0) {
-        drawLine(off, w, data.j, colors[res[x - 1]%colors.length]);
+      if (res[x - 1] > 0) {
+        drawLine(off, w, data.j, colors[res[x - 1] % colors.length]);
       }
       off += w;
-      w = 1
+      w = 1;
     }
   }
 });
@@ -53,9 +61,9 @@ function compute_row(j) {
     : new ArrayBuffer(width * bytesPerPixel);
 
   worker.postMessage({
-    buffer,
-    j,
-    width,
+    buffer: buffer,
+    j: j,
+    width: width,
     realStart: REAL_SET.start,
     realEnd: REAL_SET.end,
     im:
@@ -72,8 +80,6 @@ function draw() {
     compute_row(i);
   }
 }
-
-draw();
 
 let ZOOM_FACTOR = 0;
 
@@ -101,3 +107,5 @@ canvas.addEventListener("wheel", (e) => {
 
 const getRelativePoint = (pixel, length, set) =>
   set.start + (pixel / length) * (set.end - set.start);
+
+draw()
