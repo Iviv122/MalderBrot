@@ -8,12 +8,17 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 256;
+const iteration = 1000;
 const limit = 2;
 
-const getColor = (n) => {
-  return `rgb(0, ${n}, ${n % 256})`;
+const getColor = (val) => {
+  return `rgb(0, ${val%256}, ${val%256})`;
 };
+
+const clear = () => {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, width, height);
+}
 
 const setPixel = (x, y, color) => {
   ctx.fillStyle = color;
@@ -24,14 +29,25 @@ let REAL_SET = { start: -2, end: 1 };
 let IMAGINARY_SET = { start: -1, end: 1 };
 
 const worker = new Worker("worker.js");
+
 worker.addEventListener("message", ({ data }) => {
-  data.res.forEach((v, i) => {
-    setPixel(i, data.j, v[1] ? getColor(0) : getColor(v[0]));
-  });
+  const res = new Uint32Array(data.res);
+  for (let x = 0; x < width; x++) {
+    if (res[x] > 0) {
+      setPixel(x, data.j, getColor(res[x]));
+    }
+  }
 });
 
+
+const bytesPerPixel = Uint32Array.BYTES_PER_ELEMENT;
 function compute_row(j) {
+  const buffer = crossOriginIsolated
+    ? new SharedArrayBuffer(width * bytesPerPixel)
+    : new ArrayBuffer(width * bytesPerPixel);
+
   worker.postMessage({
+    buffer,
     j,
     width,
     realStart: REAL_SET.start,
@@ -45,6 +61,7 @@ function compute_row(j) {
 }
 
 function draw() {
+  clear()
   for (let i = 0; i < height; i++) {
     compute_row(i);
   }
@@ -58,9 +75,8 @@ canvas.addEventListener("wheel", (e) => {
   if (e.deltaY > 0) {
     ZOOM_FACTOR = 0.1;
   } else {
-    ZOOM_FACTOR = 10;
+    ZOOM_FACTOR = 2;
   }
-  console.log(e.deltaY, e.pageX);
   const zfw = width * ZOOM_FACTOR;
   const zfh = height * ZOOM_FACTOR;
 
@@ -73,6 +89,7 @@ canvas.addEventListener("wheel", (e) => {
     end: getRelativePoint(e.pageY + zfh, height, IMAGINARY_SET),
   };
 
+  clear()
   draw();
 });
 
