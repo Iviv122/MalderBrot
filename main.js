@@ -8,11 +8,11 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 1000;
+const iteration = 256;
 const limit = 2;
 
 const getColor = (n) => {
-  return `rgb(0, ${(n / iteration) * 256}, 0)`;
+  return `rgb(0, ${n}, ${n % 256})`;
 };
 
 const setPixel = (x, y, color) => {
@@ -20,15 +20,13 @@ const setPixel = (x, y, color) => {
   ctx.fillRect(x, y, 1, 1);
 };
 
-const colors = new Array(iteration).fill(0).map((_, i) => getColor(i));
-
-const REAL_SET = { start: -2, end: 1 };
-const IMAGINARY_SET = { start: -1, end: 1 };
+let REAL_SET = { start: -2, end: 1 };
+let IMAGINARY_SET = { start: -1, end: 1 };
 
 const worker = new Worker("worker.js");
 worker.addEventListener("message", ({ data }) => {
   data.res.forEach((v, i) => {
-    setPixel(i, data.j, colors[v[1] ? 0 : (v[0] % colors.length) - 1 + 1]);
+    setPixel(i, data.j, v[1] ? getColor(0) : getColor(v[0]));
   });
 });
 
@@ -53,3 +51,30 @@ function draw() {
 }
 
 draw();
+
+let ZOOM_FACTOR = 0;
+
+canvas.addEventListener("wheel", (e) => {
+  if (e.deltaY > 0) {
+    ZOOM_FACTOR = 0.1;
+  } else {
+    ZOOM_FACTOR = 10;
+  }
+  console.log(e.deltaY, e.pageX);
+  const zfw = width * ZOOM_FACTOR;
+  const zfh = height * ZOOM_FACTOR;
+
+  REAL_SET = {
+    start: getRelativePoint(e.pageX - zfw, width, REAL_SET),
+    end: getRelativePoint(e.pageX + zfw, width, REAL_SET),
+  };
+  IMAGINARY_SET = {
+    start: getRelativePoint(e.pageY - zfh, height, IMAGINARY_SET),
+    end: getRelativePoint(e.pageY + zfh, height, IMAGINARY_SET),
+  };
+
+  draw();
+});
+
+const getRelativePoint = (pixel, length, set) =>
+  set.start + (pixel / length) * (set.end - set.start);
