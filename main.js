@@ -8,12 +8,12 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 1000;
+const iteration = 5000;
 const limit = 2;
 
 var Module = {
   onRuntimeInitialized: function () {
-    draw()
+    draw();
   },
 };
 
@@ -108,4 +108,4 @@ canvas.addEventListener("wheel", (e) => {
 const getRelativePoint = (pixel, length, set) =>
   set.start + (pixel / length) * (set.end - set.start);
 
-draw()
+draw();
