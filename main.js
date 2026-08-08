@@ -8,22 +8,16 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 1000;
+const iteration = 200;
 const limit = 2;
 
-const getColor = (val) => {
-  return `rgb(0, ${val % 256}, ${val % 256})`;
-};
+const colors = new Array(256).fill(0).map((_,val) =>`rgb(0, ${val % 256}, ${val % 256})`)
 
 const clear = () => {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, width, height);
 };
 
-const setPixel = (x, y, color) => {
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, 1, 1);
-};
 const drawLine = (off, x, y, color) => {
   ctx.fillStyle = color;
   ctx.fillRect(off, y, x, 1);
@@ -44,7 +38,7 @@ worker.addEventListener("message", ({ data }) => {
       w++;
     } else {
       if (res[x-1] > 0) {
-        drawLine(off, w, data.j, getColor(res[x - 1]));
+        drawLine(off, w, data.j, colors[res[x - 1]%colors.length]);
       }
       off += w;
       w = 1
