@@ -12,17 +12,21 @@ const iteration = 1000;
 const limit = 2;
 
 const getColor = (val) => {
-  return `rgb(0, ${val%256}, ${val%256})`;
+  return `rgb(0, ${val % 256}, ${val % 256})`;
 };
 
 const clear = () => {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, width, height);
-}
+};
 
 const setPixel = (x, y, color) => {
   ctx.fillStyle = color;
   ctx.fillRect(x, y, 1, 1);
+};
+const drawLine = (off, x, y, color) => {
+  ctx.fillStyle = color;
+  ctx.fillRect(off, y, x, 1);
 };
 
 let REAL_SET = { start: -2, end: 1 };
@@ -32,13 +36,21 @@ const worker = new Worker("worker.js");
 
 worker.addEventListener("message", ({ data }) => {
   const res = new Uint32Array(data.res);
-  for (let x = 0; x < width; x++) {
-    if (res[x] > 0) {
-      setPixel(x, data.j, getColor(res[x]));
+  let w = 1;
+  let off = 0;
+  let last = res[0];
+  for (let x = 1; x < width; x++) {
+    if (res[x] === last) {
+      w++;
+    } else {
+      if (res[x-1] > 0) {
+        drawLine(off, w, data.j, getColor(res[x - 1]));
+      }
+      off += w;
+      w = 1
     }
   }
 });
-
 
 const bytesPerPixel = Uint32Array.BYTES_PER_ELEMENT;
 function compute_row(j) {
@@ -61,7 +73,7 @@ function compute_row(j) {
 }
 
 function draw() {
-  clear()
+  clear();
   for (let i = 0; i < height; i++) {
     compute_row(i);
   }
@@ -89,7 +101,7 @@ canvas.addEventListener("wheel", (e) => {
     end: getRelativePoint(e.pageY + zfh, height, IMAGINARY_SET),
   };
 
-  clear()
+  clear();
   draw();
 });
 
