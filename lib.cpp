@@ -6,7 +6,7 @@
 
 using namespace emscripten;
 
-uint32_t mandelbrot(double cx, double cy, double max, int it) {
+inline uint32_t mandelbrot(double cx, double cy, double max, int it) {
   double zx = 0;
   double zy = 0;
   double px = 0;

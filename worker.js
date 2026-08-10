@@ -1,16 +1,31 @@
 var Module = {
   onRuntimeInitialized: async function () {
     moduleReady = true;
-    while (queue.length > 0) {
-      Process_Row(queue.shift());
-    }
+    work();
   },
 };
 importScripts("./lib.js");
 
-const queue = [];
+const stack = [];
 let moduleReady = false;
+let isWorking = false;
 let reset_id = 0;
+
+function work() {
+  if (isWorking) {
+    return;
+  }
+  if (!moduleReady) {
+    return;
+  }
+  isWorking = true;
+
+  while (stack.length > 0) {
+    Process_Row(stack.pop());
+  }
+
+  isWorking = false;
+}
 
 async function Process_Row(data) {
   if (data.reset_id < reset_id) {
@@ -34,18 +49,19 @@ async function Process_Row(data) {
   postMessage({ j: data.j, res: res, reset_id: data.reset_id });
 }
 
-async function reset() {
-  queue.length = 0;
-}
-
 onmessage = async ({ data }) => {
+  if (data.break !== undefined) {
+    reset_id = data.break;
+    console.log("break");
+    return;
+  }
   if (data.reset_id < reset_id) {
     return;
   }
-  reset_id = data.reset_id;
-  if (!moduleReady) {
-    queue.push(data);
-    return;
+  if (data.reset_id > reset_id) {
+    stack.length = 0;
+    reset_id = data.reset_id;
   }
-  Process_Row(data);
+  stack.push(data);
+  work();
 };

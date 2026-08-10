@@ -10,7 +10,7 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 256;
+const iteration = 5000;
 const limit = 2;
 let reset_id = 0;
 
@@ -63,11 +63,6 @@ worker.addEventListener("message", async ({ data }) => {
       last = res[x];
     }
   }
-
-  // Draw the final run.
-  if (res[width - 1] > 0) {
-    drawLine(off, w, data.j, colors[res[width - 1] % colors.length]);
-  }
 });
 
 const bytesPerPixel = Uint32Array.BYTES_PER_ELEMENT;
@@ -106,6 +101,7 @@ let ZOOM_FACTOR = 0;
 canvas.addEventListener("wheel", async (e) => {
   e.preventDefault();
   reset_id++;
+  worker.postMessage({ break: reset_id });
   clear();
 
   if (e.deltaY > 0) {
