@@ -10,9 +10,10 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-let iteration = 128;
+let iteration = 256;
 let explode_value = 2;
 let reset_id = 0;
+let power = 2;
 
 var Module = {
   onRuntimeInitialized: function () {
@@ -22,7 +23,7 @@ var Module = {
 
 const colors = new Array(256)
   .fill(0)
-  .map((_, val) => `rgb(0, ${val % 256}, ${val % 256})`);
+  .map((_, val) => `rgb(0, ${(val * 10) % 256}, ${val % 256})`);
 
 const clear = async () => {
   ctx.fillStyle = "black";
@@ -36,6 +37,7 @@ const drawLine = async (off, x, y, color) => {
 
 let REAL_SET = { start: -2, end: 1 };
 let IMAGINARY_SET = { start: -1, end: 1 };
+let ZOOM_FACTOR = 0;
 
 const worker = new Worker("worker.js");
 
@@ -73,6 +75,7 @@ async function draw_new() {
 }
 
 async function draw(curr_id) {
+  clear()
   worker.postMessage({
     width,
     height,
@@ -85,13 +88,11 @@ async function draw(curr_id) {
   });
 }
 
-let ZOOM_FACTOR = 0;
 
 function zoom(e, zoom_factor) {
   e.preventDefault();
   reset_id++;
   worker.postMessage({ break: reset_id });
-  clear();
 
   const zfw = width * zoom_factor;
   const zfh = height * zoom_factor;
@@ -140,9 +141,28 @@ iteration_slider.addEventListener("input", (e) => {
   iteration = e.target.value;
   draw_new();
 });
+
 const explode_slider = document.getElementById("explode");
 explode_slider.value = explode_value;
 explode_slider.addEventListener("input", (e) => {
   explode_value = e.target.value;
   draw_new();
 });
+
+function reset_pos() {
+  iteration = 256;
+  explode_value = 2;
+  ZOOM_FACTOR = 0;
+  REAL_SET = { start: -2, end: 1 };
+  IMAGINARY_SET = { start: -1, end: 1 };
+
+  ctx.canvas.width = width;
+  ctx.canvas.height = height;
+  canvas.width = width;
+  canvas.height = height;
+
+  explode_slider.value = explode_value
+  iteration_slider.value = iteration
+
+  draw_new()
+}
