@@ -10,7 +10,7 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 5000;
+const iteration = 256;
 const limit = 2;
 let reset_id = 0;
 
@@ -67,33 +67,17 @@ worker.addEventListener("message", async ({ data }) => {
 
 const bytesPerPixel = Uint32Array.BYTES_PER_ELEMENT;
 
-async function compute_row(j, curr_id) {
-  const buffer = crossOriginIsolated
-    ? new SharedArrayBuffer(width * bytesPerPixel)
-    : new ArrayBuffer(width * bytesPerPixel);
-
-  worker.postMessage({
-    buffer,
-    j,
-    width,
-    realStart: REAL_SET.start,
-    realEnd: REAL_SET.end,
-    im:
-      IMAGINARY_SET.start +
-      (j / height) * (IMAGINARY_SET.end - IMAGINARY_SET.start),
-    l: limit,
-    it: iteration,
-    reset_id: curr_id,
-  });
-}
-
 async function draw(curr_id) {
-  for (let i = 0; i < height; i += 1) {
-    if (reset_id !== curr_id) {
-      return;
-    }
-    compute_row(i, curr_id);
-  }
+  worker.postMessage({
+    width,
+    height,
+    REAL_SET,
+    IMAGINARY_SET,
+    limit,
+    iteration,
+    curr_id,
+    bytesPerPixel
+  });
 }
 
 let ZOOM_FACTOR = 0;
