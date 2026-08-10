@@ -13,10 +13,14 @@ html,body{
     height: max-content;
     right: 0;
     background-color: rgba(256, 256, 256, 0.05);
+    gap: 10px;
 }
 .option{
     display: flex;
     gap: 20px;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
 }
 .but{
     padding: 2px;

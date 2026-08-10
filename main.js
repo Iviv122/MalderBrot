@@ -15,15 +15,19 @@ let explode_value = 2;
 let reset_id = 0;
 let power = 2;
 
+let r = 0;
+let g = 15;
+let b = 1;
+
 var Module = {
   onRuntimeInitialized: function () {
     draw(reset_id);
   },
 };
 
-const colors = new Array(256)
-  .fill(0)
-  .map((_, val) => `rgb(0, ${(val * 10) % 256}, ${val % 256})`);
+function getColor(val) {
+  return `rgb(${(val * r) % 256}, ${(val * g) % 256}, ${(val * b) % 256})`;
+}
 
 const clear = async () => {
   ctx.fillStyle = "black";
@@ -57,7 +61,7 @@ worker.addEventListener("message", async ({ data }) => {
       w++;
     } else {
       if (res[x - 1] > 0) {
-        drawLine(off, w, data.j, colors[res[x - 1] % colors.length]);
+        drawLine(off,w,data.j,getColor(res[x - 1]))
       }
 
       off += w;
@@ -75,7 +79,7 @@ async function draw_new() {
 }
 
 async function draw(curr_id) {
-  clear()
+  clear();
   worker.postMessage({
     width,
     height,
@@ -87,7 +91,6 @@ async function draw(curr_id) {
     bytesPerPixel,
   });
 }
-
 
 function zoom(e, zoom_factor) {
   e.preventDefault();
@@ -149,6 +152,27 @@ explode_slider.addEventListener("input", (e) => {
   draw_new();
 });
 
+const r_slider = document.getElementById("r");
+r_slider.value = r;
+r_slider.addEventListener("input", (e) => {
+  r = e.target.value;
+  draw_new();
+});
+
+const g_slider = document.getElementById("g");
+g_slider.value = g;
+g_slider.addEventListener("input", (e) => {
+  g = e.target.value;
+  draw_new();
+});
+
+const b_slider = document.getElementById("b");
+b_slider.value = b;
+b_slider.addEventListener("input", (e) => {
+  b = e.target.value;
+  draw_new();
+});
+
 function reset_pos() {
   iteration = 256;
   explode_value = 2;
@@ -161,8 +185,8 @@ function reset_pos() {
   canvas.width = width;
   canvas.height = height;
 
-  explode_slider.value = explode_value
-  iteration_slider.value = iteration
+  explode_slider.value = explode_value;
+  iteration_slider.value = iteration;
 
-  draw_new()
+  draw_new();
 }
