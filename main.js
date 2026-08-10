@@ -10,7 +10,7 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 256;
+const iteration = 5000;
 const limit = 2;
 let reset_id = 0;
 

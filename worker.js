@@ -37,14 +37,14 @@ function processBatch() {
   setTimeout(processBatch, 0);
 }
 
-function Process_Row(data) {
+async function Process_Row(data) {
   if (data.reset_id < reset_id) {
     return;
   }
 
   const res = new Uint32Array(data.buffer);
 
-  Module.processRow(
+  await Module.processRow(
     res,
     data.j,
     data.width,
