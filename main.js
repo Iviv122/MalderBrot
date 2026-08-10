@@ -10,7 +10,7 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 5000;
+const iteration = 128;
 const limit = 2;
 let reset_id = 0;
 
@@ -76,26 +76,20 @@ async function draw(curr_id) {
     limit,
     iteration,
     curr_id,
-    bytesPerPixel
+    bytesPerPixel,
   });
 }
 
 let ZOOM_FACTOR = 0;
 
-canvas.addEventListener("wheel", async (e) => {
+function zoom(e, zoom_factor) {
   e.preventDefault();
   reset_id++;
   worker.postMessage({ break: reset_id });
   clear();
 
-  if (e.deltaY > 0) {
-    ZOOM_FACTOR = 0.1;
-  } else {
-    ZOOM_FACTOR = 2;
-  }
-
-  const zfw = width * ZOOM_FACTOR;
-  const zfh = height * ZOOM_FACTOR;
+  const zfw = width * zoom_factor;
+  const zfh = height * zoom_factor;
 
   REAL_SET = {
     start: getRelativePoint(e.pageX - zfw, width, REAL_SET),
@@ -108,6 +102,28 @@ canvas.addEventListener("wheel", async (e) => {
   };
 
   draw(reset_id);
+}
+
+canvas.addEventListener("mouseup", (e) => {
+  switch (e.button) {
+    case 0:
+      zoom(e, 0.1);
+      break;
+    case 2:
+      zoom(e, 2);
+      break;
+  }
+});
+canvas.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+});
+
+canvas.addEventListener("wheel", async (e) => {
+  if (e.deltaY > 0) {
+    zoom(e, 0.1);
+  } else {
+    zoom(e, 2);
+  }
 });
 
 const getRelativePoint = (pixel, length, set) =>

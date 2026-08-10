@@ -5,3 +5,17 @@
 html,body{
     overflow: hidden;
 }
+.panel{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    height: 100%;
+    right: 0;
+    background-color: rgba(256, 256, 256, 0.05);
+    pointer-events: none;
+}
+.option{
+    display: flex;
+    gap: 20px;
+}
