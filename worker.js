@@ -46,7 +46,6 @@ async function Process_Row(data) {
 
   await Module.processRow(
     res,
-    data.j,
     data.width,
     data.realStart,
     data.realEnd,

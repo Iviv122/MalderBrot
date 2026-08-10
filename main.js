@@ -10,8 +10,8 @@ ctx.canvas.height = height;
 canvas.width = width;
 canvas.height = height;
 
-const iteration = 128;
-const limit = 2;
+let iteration = 128;
+let explode_value = 2;
 let reset_id = 0;
 
 var Module = {
@@ -67,13 +67,18 @@ worker.addEventListener("message", async ({ data }) => {
 
 const bytesPerPixel = Uint32Array.BYTES_PER_ELEMENT;
 
+async function draw_new() {
+  reset_id += 1;
+  draw(reset_id);
+}
+
 async function draw(curr_id) {
   worker.postMessage({
     width,
     height,
     REAL_SET,
     IMAGINARY_SET,
-    limit,
+    limit: explode_value,
     iteration,
     curr_id,
     bytesPerPixel,
@@ -110,7 +115,7 @@ canvas.addEventListener("mouseup", (e) => {
       zoom(e, 0.1);
       break;
     case 2:
-      zoom(e, 2);
+      zoom(e, 1.5);
       break;
   }
 });
@@ -120,11 +125,24 @@ canvas.addEventListener("contextmenu", (e) => {
 
 canvas.addEventListener("wheel", async (e) => {
   if (e.deltaY > 0) {
-    zoom(e, 0.1);
+    zoom(e, 0.4);
   } else {
-    zoom(e, 2);
+    zoom(e, 1.1);
   }
 });
 
 const getRelativePoint = (pixel, length, set) =>
   set.start + (pixel / length) * (set.end - set.start);
+
+const iteration_slider = document.getElementById("iter");
+iteration_slider.value = iteration;
+iteration_slider.addEventListener("input", (e) => {
+  iteration = e.target.value;
+  draw_new();
+});
+const explode_slider = document.getElementById("explode");
+explode_slider.value = explode_value;
+explode_slider.addEventListener("input", (e) => {
+  explode_value = e.target.value;
+  draw_new();
+});

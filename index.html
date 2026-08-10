@@ -6,9 +6,14 @@
     </head>
     <body>
         <dev class="panel">
+            <p>Use mouse buttons or scroll wheel</p>
             <div class="option">
                 <p>iterations</p>
-                <input type="number" />
+                <input id="iter" type="number" min="1" step="1" />
+            </div>
+            <div class="option">
+                <p>explode value</p>
+                <input id="explode" type="number" min="1" step="1" />
             </div>
         </dev>
         <canvas id="canvas"></canvas>
