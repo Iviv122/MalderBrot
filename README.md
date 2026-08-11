@@ -1,3 +1,4 @@
+
 # Madlerbrot set
 
 Simple vizualization in web using JS and Wasm
@@ -23,7 +24,7 @@ where z and c are imaginary numbers.
 
 We can set recursion limit as well as explosion value. In standart madlerbrot set explosion value is 2 and Z=0.
 
-
+<img width="1151" height="834" alt="Screenshot 2026-08-11 at 13 53 20" src="https://github.com/user-attachments/assets/03abf604-39c5-4cdb-8100-e4da7c1ac15a" />
 
 so, when you see this image, black means that for given C won't explode after N iterations. While every other color means that value exploded after some iterations (aka bigger then explosion value).
 
