@@ -25,7 +25,7 @@ inline uint32_t mandelbrot(double cx, double cy, double max, int it) {
     d = zx * zx + zy * zy;
     n += 1;
   } while (d <= max * max && n < it);
-  return d <= max * max ? 0 : n;
+  return n;
 };
 
 void processRow(val buffer, int width, double realStart, double realEnd,
