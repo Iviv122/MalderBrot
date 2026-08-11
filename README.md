@@ -2,6 +2,8 @@
 
 Simple vizualization in web using JS and Wasm
 
+[Demo](https://iviv122.github.io/MalderBrot/)
+
 ## features
 - zooming
 - color change
@@ -25,6 +27,11 @@ We can set recursion limit as well as explosion value. In standart madlerbrot se
 
 so, when you see this image, black means that for given C won't explode after N iterations. While every other color means that value exploded after some iterations (aka bigger then explosion value).
 
+## building c++ files
+makefile has 3 options
+- dev: assertions turned on
+- main: no assertions
+- low-precise: same as main but includes flags for faster float
 
 ## Technical flaws
 - couldn't use long double as [em++](https://emscripten.org/) can't work with such out of the box which results in black lines when zooming
